@@ -11,7 +11,7 @@ const TodoListItem = ({ label, important = false }) => {
 
     return (
         <span className="todo-list-item">
-                <span
+            <span
                 className="todo-list-item-label"
                 style={style}>
                 {label}
