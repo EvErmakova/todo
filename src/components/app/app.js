@@ -7,21 +7,32 @@ import ItemAddForm from "../item-add-form";
 import './app.css';
 
 export default class App extends PureComponent {
-    constructor(props) {
-        super(props);
+    maxId = 100;
 
-        this.state = {
-            todoData: [
-                {label: 'DrinkCoffee', important: false, id: 1},
-                {label: 'Make Awesome App', important: true, id: 2},
-                {label: 'Have a Lunch', important: false, id: 3}
-            ]
-        };
+    state = {
+        todoData: [
+            this.createTodoItem('Drink Coffee'),
+            this.createTodoItem('Make Awesome App'),
+            this.createTodoItem('Have a Lunch'),
+        ]
+    };
+
+    createTodoItem(label) {
+        return {
+            label,
+            important: false,
+            done: false,
+            id: this.maxId++
+        }
+    }
+
+    findIndex(arr, id) {
+        return arr.findIndex((el) => el.id === id);
     }
 
     deleteItem = (id) => {
         this.setState(({ todoData }) => {
-            const idx = todoData.findIndex((el) => el.id === id);
+            const idx = this.findIndex(todoData, id);
 
             return {
                 todoData: [
@@ -34,9 +45,7 @@ export default class App extends PureComponent {
 
     addItem = (label) => {
         this.setState(({ todoData }) => {
-            const newItem = {
-                label: label, important: false, id: todoData.length + 1
-            };
+            const newItem = this.createTodoItem(label);
 
             return {
                 todoData: [
@@ -47,12 +56,42 @@ export default class App extends PureComponent {
         });
     }
 
+    toggleProperty = (id, propName) => {
+        this.setState(({ todoData }) => {
+            const idx = this.findIndex(todoData, id);
+
+            const item = {
+                ...todoData[idx],
+                [propName]: !todoData[idx][propName]
+            };
+
+            return {
+                todoData: [
+                    ...todoData.slice(0, idx),
+                    item,
+                    ...todoData.slice(idx + 1)
+                ]
+            }
+        });
+    }
+
+    onToggleImportant = (id) => {
+        this.toggleProperty(id, 'important');
+    }
+
+    onToggleDone = (id) => {
+        this.toggleProperty(id, 'done');
+    }
+
     render () {
         const { todoData } = this.state;
 
+        const doneCount = todoData.filter((el) => el.done).length;
+        const todoCount = todoData.length - doneCount;
+
         return (
             <div className="todo-app">
-                <AppHeader todo={1} done={3}/>
+                <AppHeader todo={ todoCount } done={ doneCount }/>
                 <div className="top-panel d-flex">
                     <SearchPanel/>
                     <ItemStatusFilter/>
@@ -60,6 +99,8 @@ export default class App extends PureComponent {
                 <TodoList
                     todos={ todoData }
                     onDeleted={ this.deleteItem }
+                    onToggleImportant={ this.onToggleImportant }
+                    onToggleDone={ this.onToggleDone }
                 />
                 <ItemAddForm
                     onItemAdded={ this.addItem }
