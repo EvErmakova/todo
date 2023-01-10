@@ -30,13 +30,15 @@ export default class TodoListItem extends PureComponent {
                     {label}
                 </span>
 
-                <button type="button" className="btn btn-outline-success btn-sm float-right"
+                <button type="button"
+                        className={`btn btn-sm float-right ${important ? 'btn-success' : 'btn-outline-success'}`}
                         onClick={ onToggleImportant }
                 >
                     <i className="fa fa-exclamation" />
                 </button>
 
-                <button type="button" className="btn btn-outline-danger btn-sm float-right"
+                <button type="button"
+                        className="btn btn-outline-danger btn-sm float-right"
                         onClick={ onDeleted }
                 >
                     <i className="fa fa-trash-o" />

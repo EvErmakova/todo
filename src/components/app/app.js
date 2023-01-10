@@ -14,7 +14,9 @@ export default class App extends PureComponent {
             this.createTodoItem('Drink Coffee'),
             this.createTodoItem('Make Awesome App'),
             this.createTodoItem('Have a Lunch'),
-        ]
+        ],
+        term: '',
+        filter: 'all'
     };
 
     createTodoItem(label) {
@@ -23,7 +25,7 @@ export default class App extends PureComponent {
             important: false,
             done: false,
             id: this.maxId++
-        }
+        };
     }
 
     findIndex(arr, id) {
@@ -52,7 +54,7 @@ export default class App extends PureComponent {
                     ...todoData,
                     newItem
                 ]
-            }
+            };
         });
     }
 
@@ -71,7 +73,7 @@ export default class App extends PureComponent {
                     item,
                     ...todoData.slice(idx + 1)
                 ]
-            }
+            };
         });
     }
 
@@ -83,8 +85,46 @@ export default class App extends PureComponent {
         this.toggleProperty(id, 'done');
     }
 
+    search(items, term) {
+        if (term.length === 0) {
+            return items;
+        }
+
+        return items.filter((item) => {
+            return item.label.toLowerCase()
+                .includes(term.toLowerCase());
+        });
+    }
+
+    onSearchChange = (term) => {
+        this.setState({ term });
+    }
+
+    filter(items, filter) {
+        if (filter === 'all') {
+            return items;
+        }
+
+        return items.filter((item) => {
+            switch (filter) {
+                case 'active':
+                    return !item.done;
+                case 'done':
+                    return item.done;
+                default:
+                    return item;
+            }
+        });
+    }
+
+    onFilterChange = (filter) => {
+        this.setState({ filter });
+    }
+
     render () {
-        const { todoData } = this.state;
+        const { todoData, term, filter } = this.state;
+
+        const visibleItems = this.filter(this.search(todoData, term), filter);
 
         const doneCount = todoData.filter((el) => el.done).length;
         const todoCount = todoData.length - doneCount;
@@ -93,11 +133,11 @@ export default class App extends PureComponent {
             <div className="todo-app">
                 <AppHeader todo={ todoCount } done={ doneCount }/>
                 <div className="top-panel d-flex">
-                    <SearchPanel/>
-                    <ItemStatusFilter/>
+                    <SearchPanel onSearchChange={ this.onSearchChange } />
+                    <ItemStatusFilter filter={ filter } onFilterChange={ this.onFilterChange } />
                 </div>
                 <TodoList
-                    todos={ todoData }
+                    todos={ visibleItems }
                     onDeleted={ this.deleteItem }
                     onToggleImportant={ this.onToggleImportant }
                     onToggleDone={ this.onToggleDone }
